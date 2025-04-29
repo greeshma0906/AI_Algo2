@@ -89,6 +89,8 @@ from io import BytesIO
 import cairosvg
 import random
 import time
+import imageio
+import os
 
 # Initialize board
 board = chess.Board()
@@ -163,18 +165,31 @@ def alpha_beta(board, depth, alpha, beta, maximizing):
         return min_eval, best_move
 
 # Game loop
+
 def play_game():
     running = True
     clock = pygame.time.Clock()
-    move_delay = 1.5  # seconds between moves
+    move_delay = 1.0  # shorter delay for smoother video
+    frames = []       # list to store frames
+
+    temp_dir = "frames"
+    os.makedirs(temp_dir, exist_ok=True)
+
+    frame_count = 0
 
     while running:
         screen.blit(render_board(board), (0, 0))
         pygame.display.flip()
 
+        # Save frame to temp file
+        frame_path = os.path.join(temp_dir, f"frame_{frame_count:04d}.png")
+        pygame.image.save(screen, frame_path)
+        frames.append(frame_path)
+        frame_count += 1
+
         if board.is_game_over():
             print("Game Over:", board.result())
-            time.sleep(3)
+            time.sleep(2)
             running = False
             continue
 
@@ -191,6 +206,21 @@ def play_game():
         clock.tick(30)
 
     pygame.quit()
+
+    # Create video
+    print("Creating video...")
+    with imageio.get_writer("chess_game.mp4", fps=2) as writer:
+        for filename in frames:
+            image = imageio.imread(filename)
+            writer.append_data(image)
+
+    print("Video saved as chess_game.mp4")
+
+    # Clean up frame files
+    for f in frames:
+        os.remove(f)
+    os.rmdir(temp_dir)
+
 
 if __name__ == "__main__":
     play_game()
