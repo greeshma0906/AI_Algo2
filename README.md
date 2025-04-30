@@ -41,7 +41,7 @@ Next, run
 
 ```python minimax_chess.py```
 
-## For Alpha-beta pruning*:
+## For Alpha-beta pruning:
 Go to the directory
 
 ```cd/AI_Algo/Alpha-beta-pruning```
